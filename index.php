@@ -65,7 +65,7 @@
             <main class="main">
                 <?php
                     for($i=0; $i<$amount_of_cars; $i++) {
-                        createTab($i,$photo,$description,$price,$promo,$car__id);
+                        createTab($i,$photo,$description,$price,$promo,$car__id,$mysqli);
                     }
                 ?>
             </main>

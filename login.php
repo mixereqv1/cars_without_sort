@@ -108,39 +108,54 @@
 
                     <a class="logout__button" href="login.php?action=logout">Logout</a>
                     <span class="logged__user">You are logged in as: <?php echo '<b>'. $_SESSION['user'] .'</b>' ?></span>
-                    <form class="add__car" action="add__car.php" method="POST" enctype="multipart/form-data">
-                        <input type="file" id="car__photo" name="car__photo" accept="image/*" required>
-                        <input type="text" name="car__description" placeholder="Opis" required>
-                        <input type="number" name="car__price" placeholder="Cena" required>
-                        <input type="number" name="car__promo" placeholder="Promocja w %" required>
-                        <input type="submit" value="Dodaj">
-                    </form>
 
-                    <form class="add__user" action="add__user.php" method="POST">
-                        <h3>Add user</h3>
-                        <input type="text" name="user__name" placeholder="Nazwa" required>
-                        <input type="password" name="user__password" placeholder="Hasło" required>
-                        <div class="add__user__privileges">
-                            <input type="checkbox" name="add" id="add">
-                            <label for="add">Add cars</label>
-                        </div>
-                        <div class="add__user__privileges">
-                            <input type="checkbox" name="modify" id="modify">
-                            <label for="add">Modify cars</label>
-                        </div>
-                        <div class="add__user__privileges">
-                            <input type="checkbox" name="delete" id="delete">
-                            <label for="add">Delete cars</label>
-                        </div>
-                        <input type="submit" value="Dodaj użytkownika">
-                    </form>
 
-                <?php } ?>
+                    <?php 
+                        if(checkPrivileges($mysqli)['add_car'] == 1) {
+                    ?>
+
+                        <form class="add__car" action="add__car.php" method="POST" enctype="multipart/form-data">
+                            <input type="file" id="car__photo" name="car__photo" accept="image/*" required>
+                            <input type="text" name="car__description" placeholder="Opis" required>
+                            <input type="number" name="car__price" placeholder="Cena" required>
+                            <input type="number" name="car__promo" placeholder="Promocja w %" required>
+                            <input type="submit" value="Dodaj">
+                        </form>
+
+                    <?php } 
+                        if(checkPrivileges($mysqli)['add_user'] == 1) {
+                    ?>
+
+                        <form class="add__user" action="add__user.php" method="POST">
+                            <h3>Add user</h3>
+                            <input type="text" name="user__name" placeholder="Nazwa" required>
+                            <input type="password" name="user__password" placeholder="Hasło" required>
+                            <div class="add__user__privileges">
+                                <input type="checkbox" name="add_car" id="add_car">
+                                <label for="add">Add cars</label>
+                            </div>
+                            <div class="add__user__privileges">
+                                <input type="checkbox" name="modify" id="modify">
+                                <label for="add">Modify cars</label>
+                            </div>
+                            <div class="add__user__privileges">
+                                <input type="checkbox" name="delete" id="delete">
+                                <label for="add">Delete cars</label>
+                            </div>
+                            <div class="add__user__privileges">
+                                <input type="checkbox" name="add_user" id="add_user">
+                                <label for="add">Add users</label>
+                            </div>
+                            <input type="submit" value="Dodaj użytkownika">
+                        </form>
+
+                    <?php }
+                } ?>
             </div>
             <main class="main">
                 <?php
                     for($i=0; $i<$amount_of_cars; $i++) {
-                        createTab($i,$photo,$description,$price,$promo,$car__id);
+                        createTab($i,$photo,$description,$price,$promo,$car__id,$mysqli);
                     }
                 ?>
             </main>
