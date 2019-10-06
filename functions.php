@@ -1,5 +1,5 @@
 <?php
-    function checkPrivileges($mysqli) {
+    function checkPrivileges($mysqli,$number) {
         $login = $_SESSION['user'];
         $user_sql = "SELECT id_role FROM users WHERE username = '$login'";
         $user_result =  mysqli_query($mysqli,$user_sql);
@@ -10,14 +10,16 @@
         $role_result =  mysqli_query($mysqli,$role_sql);
         $role_row = mysqli_fetch_assoc($role_result);
 
-        $privilege_sql = "SELECT privilege FROM privileges WHERE id_privilege = 1";
+        $privilege_sql = "SELECT privilege FROM privileges WHERE id_privilege = $number";
         $privilege_result = mysqli_query($mysqli,$privilege_sql);
         $privilege_row = mysqli_fetch_assoc($privilege_result);
 
         $GLOBAL_SQL = "SELECT roles.role,privileges.privilege FROM users,roles,privileges,roles_privileges 
         WHERE users.id_role = roles.id_role 
         AND roles.id_role = roles_privileges.id_role 
-        AND privileges.id_privilege = roles_privileges.id_privilege";
+        AND privileges.id_privilege = roles_privileges.id_privilege
+        AND roles.id_role = $id_role
+        AND roles_privileges.id_privilege = $number";
 
         $global = mysqli_query($mysqli,$GLOBAL_SQL);
         $global_row = mysqli_fetch_assoc($global);

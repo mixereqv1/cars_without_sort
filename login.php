@@ -1,15 +1,10 @@
 <?php
     // $GLOBAL_SQL = "SELECT roles.role,privileges.privilege FROM users,roles,privileges,roles_privileges WHERE users.id_role = roles.id_role AND roles.id_role = roles_privileges.id_role AND privileges.id_privilege = roles_privileges.id_privilege";
 
-
-
     session_start();
     include_once('card.php');
     include_once('connect.php');
     include('functions.php');
-
-    // $_SESSION['logged_in'] = 'false';
-    // $_SESSION['wrong_data'] = 'false';
 
     $sql = "SELECT id FROM cars ORDER BY id DESC LIMIT 1";
     $result = $mysqli -> query($sql);
@@ -20,6 +15,7 @@
         unset($_SESSION['login']);
         unset($_SESSION['password']);
         unset($_SESSION['user']);
+        unset($_GET['action']);
     }
 
     if(isset($_POST['sign_in'])) {
@@ -67,6 +63,14 @@
 
     <body>
 
+        <?php if(isset($_GET['action']) && $_GET['action'] == 'no_permission') { 
+            unset($_GET['action']);
+        ?>
+            <script>
+                alert('Nie masz wystarczających permisji.');    
+            </script>
+        <?php } ?>
+
         <div class="container">
             <header class="header">
                 <h1>Salon samochodowy</h1>
@@ -96,13 +100,19 @@
                     <a class="logout__button" href="login.php?action=logout">Logout</a>
                     <span class="logged__user">You are logged in as: <?php echo '<b>'. $_SESSION['user'] .'</b>' ?></span>
 
-                        <form class="add__car" action="add__car.php" method="POST" enctype="multipart/form-data">
-                            <input type="file" id="car__photo" name="car__photo" accept="image/*" required>
-                            <input type="text" name="car__description" placeholder="Opis" required>
-                            <input type="number" name="car__price" placeholder="Cena" required>
-                            <input type="number" name="car__promo" placeholder="Promocja w %" required>
-                            <input type="submit" value="Dodaj">
-                        </form>
+                        <?php if(checkPrivileges($mysqli,1) == true) { ?>
+
+                            <form class="add__car" action="add__car.php" method="POST" enctype="multipart/form-data">
+                                <input type="file" id="car__photo" name="car__photo" accept="image/*" required>
+                                <input type="text" name="car__description" placeholder="Opis" required>
+                                <input type="number" name="car__price" placeholder="Cena" required>
+                                <input type="number" name="car__promo" placeholder="Promocja w %" required>
+                                <input type="submit" value="Dodaj">
+                            </form>
+
+                        <?php } 
+                            if(checkPrivileges($mysqli,4) == true) {
+                        ?>
 
                         <form class="add__user" action="add__user.php" method="POST">
                             <h3>Add user</h3>
@@ -128,7 +138,9 @@
                             <input type="submit" value="Dodaj użytkownika">
                         </form>
 
-                    <?php } ?>
+                        <?php }
+                        } 
+                    ?>
             </div>
             <main class="main">
                 <?php
