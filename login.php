@@ -1,6 +1,9 @@
 <?php
-    session_start();
+    // $GLOBAL_SQL = "SELECT roles.role,privileges.privilege FROM users,roles,privileges,roles_privileges WHERE users.id_role = roles.id_role AND roles.id_role = roles_privileges.id_role AND privileges.id_privilege = roles_privileges.id_privilege";
 
+
+
+    session_start();
     include_once('card.php');
     include_once('connect.php');
     include('functions.php');
@@ -17,43 +20,28 @@
         unset($_SESSION['login']);
         unset($_SESSION['password']);
         unset($_SESSION['user']);
-        // unset($_SESSION['logged_in']);
     }
 
     if(isset($_POST['sign_in'])) {
-        // if($_POST['login'] == 'admin' && $_POST['password'] == 'admin') {
-        //     $_SESSION['logged_in'] = 'true';
-        //     $_SESSION['wrong_data'] = 'false';
-        // } else {
-        //     $_SESSION['logged_in'] = 'false';
-        //     $_SESSION['wrong_data'] = 'true';
-        // }
-
         $login = $_POST['login'];
-        $password = $_POST['password'];
-        $query = "SELECT * FROM users WHERE login = '$login' AND password = '$password'";
+        $query = "SELECT username FROM users WHERE username = '$login'";
         $result = mysqli_query($mysqli,$query);
-        if(mysqli_num_rows($result) == 1) {
-            $_SESSION['user'] = $login;
-            $_SESSION['logged_in'] = 'true';
-            $_SESSION['wrong_data'] = 'false';
+        if(mysqli_num_rows($result) >= 1) {
+            $password = $_POST['password'];
+            $query_password = "SELECT password FROM users WHERE password = '$password'";
+            $result_password = mysqli_query($mysqli,$query_password);
+            if(mysqli_num_rows($result_password) == 1) {
+                $_SESSION['user'] = $login;
+                $_SESSION['logged_in'] = 'true';
+                $_SESSION['wrong_data'] = 'false';
+            } else {
+                $_SESSION['wrong_data'] = 'true';
+            }
         } else {
             // $_SESSION['logged_in'] = 'false';
             $_SESSION['wrong_data'] = 'true';
         }
     }
-    
-    // $sql = "SELECT * FROM cars";
-    // if($result = $mysqli -> query($sql)) {
-    //     echo ('<table>');
-    //     while($row = $result -> fetch_assoc()) {
-    //         echo('<tr>');
-    //         echo('<td>'.$row['id'].'</td><td>'.$row['photo'].'</td><td>'.$row['description'].'</td><td>'.$row['price'].'</td><td>'.$row['promo'].'</td>');
-    //         echo('</tr>');
-    //     }
-    //     echo ('</table>');
-    // }
-
 ?>
 
 <!DOCTYPE html>
@@ -82,7 +70,6 @@
         <div class="container">
             <header class="header">
                 <h1>Salon samochodowy</h1>
-                <!-- <a class="login__link" href="login.php">Sign in</a> -->
                 <a href="index.php" class="home__page">Home page</a>
             </header>
             <div class="sidebar">
@@ -91,11 +78,11 @@
                         echo('<span class="logged__out">Logged out correctly</span>');
                     }
 
-                    if($_SESSION['wrong_data'] == 'true') {
+                    if(isset($_SESSION['wrong_data']) && $_SESSION['wrong_data'] == 'true') {
                         echo('<span class="wrong__data">Incorrect login/password</span>');
                     }
 
-                    if($_SESSION['logged_in'] == 'false') {
+                    if(!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] == 'false') {
                  ?>
                     <form action="login.php" method="POST">
                         <label for="login">Login:</label>
@@ -109,11 +96,6 @@
                     <a class="logout__button" href="login.php?action=logout">Logout</a>
                     <span class="logged__user">You are logged in as: <?php echo '<b>'. $_SESSION['user'] .'</b>' ?></span>
 
-
-                    <?php 
-                        if(checkPrivileges($mysqli)['add_car'] == 1) {
-                    ?>
-
                         <form class="add__car" action="add__car.php" method="POST" enctype="multipart/form-data">
                             <input type="file" id="car__photo" name="car__photo" accept="image/*" required>
                             <input type="text" name="car__description" placeholder="Opis" required>
@@ -122,15 +104,12 @@
                             <input type="submit" value="Dodaj">
                         </form>
 
-                    <?php } 
-                        if(checkPrivileges($mysqli)['add_user'] == 1) {
-                    ?>
-
                         <form class="add__user" action="add__user.php" method="POST">
                             <h3>Add user</h3>
                             <input type="text" name="user__name" placeholder="Nazwa" required>
                             <input type="password" name="user__password" placeholder="Hasło" required>
-                            <div class="add__user__privileges">
+                            <input type="number" name="user__role" placeholder="Rola" required>
+                            <!-- <div class="add__user__privileges">
                                 <input type="checkbox" name="add_car" id="add_car">
                                 <label for="add">Add cars</label>
                             </div>
@@ -145,12 +124,11 @@
                             <div class="add__user__privileges">
                                 <input type="checkbox" name="add_user" id="add_user">
                                 <label for="add">Add users</label>
-                            </div>
+                            </div> -->
                             <input type="submit" value="Dodaj użytkownika">
                         </form>
 
-                    <?php }
-                } ?>
+                    <?php } ?>
             </div>
             <main class="main">
                 <?php

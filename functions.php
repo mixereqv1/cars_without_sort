@@ -1,13 +1,37 @@
 <?php
     function checkPrivileges($mysqli) {
-        if(isset($_SESSION['user'])) {
-            $user = $_SESSION['user'];
-            $check_privileges = "SELECT * FROM privileges WHERE user_name = '$user'";
-            $check_result = mysqli_query($mysqli,$check_privileges);
-            $check_row = mysqli_fetch_assoc($check_result);
-            return $check_row;
+        $login = $_SESSION['user'];
+        $user_sql = "SELECT id_role FROM users WHERE username = '$login'";
+        $user_result =  mysqli_query($mysqli,$user_sql);
+        $user_row = mysqli_fetch_assoc($user_result);
+        $id_role = $user_row['id_role'];
+
+        $role_sql = "SELECT role FROM roles WHERE id_role = $id_role";
+        $role_result =  mysqli_query($mysqli,$role_sql);
+        $role_row = mysqli_fetch_assoc($role_result);
+
+        $privilege_sql = "SELECT privilege FROM privileges WHERE id_privilege = 1";
+        $privilege_result = mysqli_query($mysqli,$privilege_sql);
+        $privilege_row = mysqli_fetch_assoc($privilege_result);
+
+        $GLOBAL_SQL = "SELECT roles.role,privileges.privilege FROM users,roles,privileges,roles_privileges 
+        WHERE users.id_role = roles.id_role 
+        AND roles.id_role = roles_privileges.id_role 
+        AND privileges.id_privilege = roles_privileges.id_privilege";
+
+        $global = mysqli_query($mysqli,$GLOBAL_SQL);
+        $global_row = mysqli_fetch_assoc($global);
+
+        $privilege = false;
+
+        if($role_row['role'] == $global_row['role'] && $privilege_row['privilege'] == $global_row['privilege']) {
+            $privilege = true;
         }
+
+        return $privilege;
     }
+
+
 
     function createTab($i,$photo,$description,$price,$promo,$car__id,$mysqli) {
         echo('
@@ -21,7 +45,7 @@
                     // if(isset($_SESSION['user']) && $_SESSION['user'] == 'admin' && $_SESSION['logged_in'] == 'true') {
                     //     echo '<input type="submit" value="Update title" class="edit__title">';
                     // }
-                    if(checkPrivileges($mysqli)['modify'] == 1) {
+                    if($_SESSION['logged_in'] == 'true') {
                         echo '<input type="submit" value="Update title" class="edit__title">';
                     }
                     echo('
@@ -52,7 +76,7 @@
                     //         </form>'
                     //     );
                     // }
-                    if(checkPrivileges($mysqli)['delete'] == 1) {
+                    if($_SESSION['logged_in'] == 'true') {
                         echo('
                             <form action="del__car.php" method="POST">
                                 <input type="hidden" name="car__id" value='.$car__id[$i].'>
