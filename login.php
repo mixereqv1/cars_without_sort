@@ -2,16 +2,17 @@
     // $GLOBAL_SQL = "SELECT roles.role,privileges.privilege FROM users,roles,privileges,roles_privileges WHERE users.id_role = roles.id_role AND roles.id_role = roles_privileges.id_role AND privileges.id_privilege = roles_privileges.id_privilege";
 
     session_start();
+
     include_once('card.php');
     include_once('connect.php');
-    include('functions.php');
+    include_once('functions.php');
 
     $sql = "SELECT id FROM cars ORDER BY id DESC LIMIT 1";
     $result = $mysqli -> query($sql);
     $amount_of_cars = $result -> fetch_assoc()['id'];
 
     if(isset($_GET['action']) && $_GET['action'] == 'logout') {
-        $_SESSION['logged_in'] = 'false';
+        $_SESSION['logged_in'] = false;
         unset($_SESSION['login']);
         unset($_SESSION['password']);
         unset($_SESSION['user']);
@@ -19,23 +20,26 @@
     }
 
     if(isset($_POST['sign_in'])) {
-        $login = $_POST['login'];
-        $query = "SELECT username FROM users WHERE username = '$login'";
-        $result = mysqli_query($mysqli,$query);
-        if(mysqli_num_rows($result) >= 1) {
-            $password = $_POST['password'];
-            $query_password = "SELECT password FROM users WHERE password = '$password'";
-            $result_password = mysqli_query($mysqli,$query_password);
-            if(mysqli_num_rows($result_password) == 1) {
-                $_SESSION['user'] = $login;
-                $_SESSION['logged_in'] = 'true';
-                $_SESSION['wrong_data'] = 'false';
+        if($_POST['login'] != '' && $_POST['password'] != '') {
+            $login = $_POST['login'];
+            $query = "SELECT username,password FROM users WHERE username = '$login'";
+            $result = $mysqli -> query($query);
+            $row = $result -> fetch_assoc();
+            if($row['username'] == $login) {
+                $password = $_POST['password'];
+                if($row['password'] == $password) {
+                    $_SESSION['user'] = $login;
+                    $_SESSION['logged_in'] = true;
+                    $_SESSION['wrong_data'] = false;
+                    $_SESSION['no_data'] = false;
+                } else {
+                    $_SESSION['wrong_data'] = true;
+                }
             } else {
-                $_SESSION['wrong_data'] = 'true';
+                $_SESSION['wrong_data'] = true;
             }
         } else {
-            // $_SESSION['logged_in'] = 'false';
-            $_SESSION['wrong_data'] = 'true';
+            $_SESSION['no_data'] = true;
         }
     }
 ?>
@@ -82,17 +86,21 @@
                         echo('<span class="logged__out">Logged out correctly</span>');
                     }
 
-                    if(isset($_SESSION['wrong_data']) && $_SESSION['wrong_data'] == 'true') {
+                    if(isset($_SESSION['wrong_data']) && $_SESSION['wrong_data'] == true) {
                         echo('<span class="wrong__data">Incorrect login/password</span>');
                     }
 
-                    if(!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] == 'false') {
+                    if(isset($_SESSION['no_data']) && $_SESSION['no_data'] == true) {
+                        echo('<span class="wrong__data">Login/password cannot be empty</span>');
+                    }
+
+                    if(!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] == false) {
                  ?>
                     <form action="login.php" method="POST">
                         <label for="login">Login:</label>
-                        <input type="text" name="login" id="login" required>
+                        <input type="text" name="login" id="login">
                         <label for="password">Password:</label>
-                        <input type="password" name="password" id="password" required>
+                        <input type="password" name="password" id="password">
                         <input type="submit" value="Sign in" name="sign_in">
                     </form>
                 <?php } else { ?>

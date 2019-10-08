@@ -47,7 +47,7 @@
                     // if(isset($_SESSION['user']) && $_SESSION['user'] == 'admin' && $_SESSION['logged_in'] == 'true') {
                     //     echo '<input type="submit" value="Update title" class="edit__title">';
                     // }
-                    if($_SESSION['logged_in'] == 'true') {
+                    if(isset($_SESSION['logged_in']) && $_SESSION['logged_in'] == true) {
                         echo '<input type="submit" value="Update title" class="edit__title">';
                     }
                     echo('
@@ -78,7 +78,7 @@
                     //         </form>'
                     //     );
                     // }
-                    if($_SESSION['logged_in'] == 'true') {
+                    if(isset($_SESSION['logged_in']) && $_SESSION['logged_in'] == true) {
                         echo('
                             <form action="del__car.php" method="POST">
                                 <input type="hidden" name="car__id" value='.$car__id[$i].'>
